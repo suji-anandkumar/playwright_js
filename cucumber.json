@@ -1,0 +1,4 @@
+{"default": {"paths": ["src/test/features"],
+  "publishQuiet": true,
+  "require": ["src/test/steps"]
+}}
