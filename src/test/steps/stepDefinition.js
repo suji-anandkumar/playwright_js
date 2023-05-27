@@ -62,12 +62,36 @@ Then('Verify if user is able to login successfully when username or password is 
     console.log("User is landed in Dashboard page when valid username and password is entered");
     await browser.close();
 });
-Then('Click on Add New Product', async function () {
+
+Then('Click on Add New Product', async function ()
+{
     await page.getByRole('button', { name: 'Add product' }).click();
     console.log("Clicked on Add New Product");
     await page.locator('div').filter({ hasText: /^Manual entryCreate this record field by field\.$/ }).nth(2).click();
 });
-Then('Enter the details of the new product as {string} and {string} and {string}', async function (name,des,price) {
+Then('I verify if any product exist with the same product name {string}', async function (name)
+{
+    //#------------Precondition before creating a new product-----------------#
+    await page.getByPlaceholder('Type to search by name').click();
+    await page.getByPlaceholder('Type to search by name').fill(name);
+
+   try
+   {
+       await page.waitForSelector("text=No items found",1000);
+       console.log("No Product with same name present");
+   }
+    catch (err)
+    {
+        console.log("Already a product exist with the name : "+name + ", thus deleting the existing one");
+        await page.getByRole('checkbox', { name: 'Select this row' }).check();
+        await page.getByRole('button', { name: 'Delete 1 record' }).click();
+        await page.getByRole('button', { name: 'Yes, do it' }).click();
+    }
+
+});
+Then('Enter the details of the new product as {string} and {string} and {string}', async function (name,des,price)
+{
+
     await page.getByLabel('Product name').fill(name);
     await page.getByLabel('Product description').fill(des);
     await page.getByLabel('Unit price').click();
@@ -80,8 +104,17 @@ Then('Enter the details of the new product as {string} and {string} and {string}
 });
 Then('Submit the product details', async function () {
 
-   // await if(page.getByText('Could not save this record').isVisible()
     await page.getByRole('button', { name: 'Save changes' }).click();
+    try
+    {
+        await page.waitForSelector("text=Could not save this record",1000);
+        await page.getByRole('button', { name: 'Dismiss toast' }).click();
+        await page.getByRole('button', { name: 'Save changes' }).click();
+    }
+    catch (err)
+    {
+        console.log("No error notification toast detected while entering the details for the new product");
+    }
 
     console.log("Submitted the details for a new Product");
 });
