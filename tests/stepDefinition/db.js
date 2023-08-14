@@ -7,7 +7,7 @@ const password = "your_password";
 const connString = `DATABASE=${database};HOSTNAME=${hostname};PORT=50000;PROTOCOL=TCPIP;UID=${username};PWD=${password};`;
 const connection = ibm_db.openSync(connString);
 const sqlQuery = "SELECT * FROM your_table";
-const stmt = connection.querySync(sqlQuery);
+const stmt = connection.querySync(sqlQuery);|
 while (stmt.fetchSync()) {
     const row = stmt.fetchRowSync();
     // Process the fetched row
