@@ -1,18 +1,18 @@
 import pandas as pd
 
-def compare_column_names(expected_cols, actual_cols):
-    missing_columns = set(expected_cols) - set(actual_cols)
-    extra_columns = set(actual_cols) - set(expected_cols)
-    return missing_columns, extra_columns
-
 def main():
-    column_names_path = 'column_names.txt'
-    data_file_path = 'data.csv'
-    
-    expected_columns = pd.read_csv(column_names_path, nrows=0).columns
-    actual_columns = pd.read_csv(data_file_path, nrows=0).columns
-    
-    missing_columns, extra_columns = compare_column_names(expected_columns, actual_columns)
+    expected_column_names_path = 'column_names.txt'
+    csv_file_path = 'your_file.csv'  # Replace with your CSV file path
+
+    # Read expected column names from the text file
+    with open(expected_column_names_path, 'r') as file:
+        expected_column_names = [line.strip() for line in file]
+
+    # Read the first row of the CSV file to get actual column names
+    actual_column_names = pd.read_csv(csv_file_path, nrows=0).columns
+
+    missing_columns = set(expected_column_names) - set(actual_column_names)
+    extra_columns = set(actual_column_names) - set(expected_column_names)
 
     if missing_columns:
         print("Missing columns:")
@@ -23,27 +23,6 @@ def main():
         print("Extra columns:")
         for col in extra_columns:
             print(col)
-
-if __name__ == "__main__":
-    main()
-import pandas as pd
-
-def check_text_column(csv_path, column_name):
-    df = pd.read_csv(csv_path)
-    
-    non_text_values = df[~df[column_name].apply(lambda x: isinstance(x, str))]
-    
-    if not non_text_values.empty:
-        print(f"Non-text values found in column '{column_name}':")
-        print(non_text_values)
-    else:
-        print(f"All values in column '{column_name}' are text.")
-
-def main():
-    csv_file_path = 'your_file.csv'  # Replace with your CSV file path
-    target_column = 'column_name'    # Replace with the name of the column to check
-    
-    check_text_column(csv_file_path, target_column)
 
 if __name__ == "__main__":
     main()
