@@ -26,3 +26,24 @@ def main():
 
 if __name__ == "__main__":
     main()
+import pandas as pd
+
+def check_text_column(csv_path, column_name):
+    df = pd.read_csv(csv_path)
+    
+    non_text_values = df[~df[column_name].apply(lambda x: isinstance(x, str))]
+    
+    if not non_text_values.empty:
+        print(f"Non-text values found in column '{column_name}':")
+        print(non_text_values)
+    else:
+        print(f"All values in column '{column_name}' are text.")
+
+def main():
+    csv_file_path = 'your_file.csv'  # Replace with your CSV file path
+    target_column = 'column_name'    # Replace with the name of the column to check
+    
+    check_text_column(csv_file_path, target_column)
+
+if __name__ == "__main__":
+    main()
