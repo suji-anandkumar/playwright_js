@@ -1,0 +1,28 @@
+import pandas as pd
+
+def compare_column_names(expected_cols, actual_cols):
+    missing_columns = set(expected_cols) - set(actual_cols)
+    extra_columns = set(actual_cols) - set(expected_cols)
+    return missing_columns, extra_columns
+
+def main():
+    column_names_path = 'column_names.txt'
+    data_file_path = 'data.csv'
+    
+    expected_columns = pd.read_csv(column_names_path, nrows=0).columns
+    actual_columns = pd.read_csv(data_file_path, nrows=0).columns
+    
+    missing_columns, extra_columns = compare_column_names(expected_columns, actual_columns)
+
+    if missing_columns:
+        print("Missing columns:")
+        for col in missing_columns:
+            print(col)
+
+    if extra_columns:
+        print("Extra columns:")
+        for col in extra_columns:
+            print(col)
+
+if __name__ == "__main__":
+    main()
