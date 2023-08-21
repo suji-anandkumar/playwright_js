@@ -81,3 +81,20 @@ def main():
 
 if __name__ == "__main__":
     main()
+from datetime import datetime
+
+def change_date_format(input_date, input_format, output_format):
+    input_datetime = datetime.strptime(input_date, input_format)
+    output_date = input_datetime.strftime(output_format)
+    return output_date
+
+def main():
+    input_date = "2023-07-03"
+    input_format = "%Y-%m-%d"
+    output_format = "%d/%m/%Y"
+
+    formatted_date = change_date_format(input_date, input_format, output_format)
+    print("Formatted date:", formatted_date)
+
+if __name__ == "__main__":
+    main()
