@@ -22,3 +22,33 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+import pandas as pd
+
+def load_csv_into_dict(csv_path):
+    df = pd.read_csv(csv_path)
+    records_dict = df.to_dict(orient='index')
+    return records_dict
+
+def get_symbol_by_trade_id(records_dict, trade_id):
+    record = records_dict.get(trade_id)
+    if record:
+        return record['Symbol']
+    else:
+        return None
+
+def main():
+    csv_file_path = 'data.csv'
+    
+    records_dict = load_csv_into_dict(csv_file_path)
+
+    trade_id = input("Enter Trade ID: ")
+    symbol = get_symbol_by_trade_id(records_dict, int(trade_id))
+
+    if symbol:
+        print(f"Symbol for Trade ID {trade_id}: {symbol}")
+    else:
+        print("Trade ID not found in the CSV.")
+
+if __name__ == "__main__":
+    main()
