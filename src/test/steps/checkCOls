@@ -52,3 +52,32 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def read_column_order_from_file(file_path):
+    with open(file_path, 'r') as file:
+        column_order = [line.strip() for line in file]
+    return column_order
+
+def verify_column_order(csv_path, column_order):
+    with open(csv_path, 'r') as file:
+        header = file.readline().strip().split(',')
+    
+    if header == column_order:
+        return True
+    else:
+        return False
+
+def main():
+    column_order_file = 'column_order.txt'
+    csv_file_path = 'data.csv'
+
+    column_order = read_column_order_from_file(column_order_file)
+    is_correct_order = verify_column_order(csv_file_path, column_order)
+
+    if is_correct_order:
+        print("Column order is correct.")
+    else:
+        print("Column order is incorrect.")
+
+if __name__ == "__main__":
+    main()
