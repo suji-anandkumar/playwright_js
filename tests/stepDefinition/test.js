@@ -1,22 +1,42 @@
-import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 
-// Define a function to read XML data from a file
-function readXmlFile(filePath: string): string {
-    return fs.readFileSync(filePath, 'utf-8');
-}
-
-// Define a function to extract text content using an XPath-like expression
-async function extractTextContent(xmlData: string, relativeXPath: string): Promise<string | null> {
+// Define a function to extract text content using a relative XPath expression
+function extractTextFromXmlWithDoubleSlash(xmlData: string, relativeXPath: string): string | null {
     try {
         // Parse the XML data using xml2js
-        const parsedData = await xml2js.parseStringPromise(xmlData);
+        const parsedData = xml2js.xml2js(xmlData, { compact: false });
 
-        // Use the relativeXPath to navigate and extract the text content
-        const result = traverseXml(parsedData, relativeXPath);
+        // Remove any leading slash from the relativeXPath
+        const cleanedRelativeXPath = relativeXPath.startsWith('//') ? relativeXPath.substring(2) : relativeXPath;
 
-        if (result !== null) {
-            return result;
+        // Split the cleaned relativeXPath into parts
+        const parts = cleanedRelativeXPath.split('/');
+
+        // Function to recursively traverse the parsed XML object
+        const traverseXml = (current: any, index: number): string | null => {
+            if (!current || !current.elements) {
+                return null;
+            }
+
+            const part = parts[index];
+            const element = current.elements.find((el: any) => el.name === part);
+
+            if (!element) {
+                return null;
+            }
+
+            if (index === parts.length - 1) {
+                return element.elements[0]?.text || null;
+            }
+
+            return traverseXml(element, index + 1);
+        };
+
+        // Start traversal from the root element
+        const textContent = traverseXml(parsedData, 0);
+
+        if (textContent !== null) {
+            return textContent;
         } else {
             return 'Not found';
         }
@@ -25,47 +45,14 @@ async function extractTextContent(xmlData: string, relativeXPath: string): Promi
     }
 }
 
-// Define a function to recursively traverse the parsed XML object
-function traverseXml(parsedData: any, relativePath: string): string | null {
-    const parts = relativePath.split('/');
-    let current = parsedData;
-
-    for (const part of parts) {
-        if (part && current[part]) {
-            current = current[part];
-        } else {
-            return null;
-        }
-    }
-
-    if (typeof current === 'string') {
-        return current;
-    } else {
-        return null;
-    }
-}
-
 // Usage example:
-const xmlFilePath = 'path/to/xml/file.xml';
+const xmlData = '<notification><date><newDate><tradeDate>2023-09-30</tradeDate></newDate></date></notification>';
 const relativeXPath = '//tradeDate'; // Use your desired relative XPath
 
-try {
-    // Read XML data from the file
-    const xmlData = readXmlFile(xmlFilePath);
+const textContent = extractTextFromXmlWithDoubleSlash(xmlData, relativeXPath);
 
-    // Extract text content using the relativeXPath
-    extractTextContent(xmlData, relativeXPath)
-        .then((textContent) => {
-            if (textContent !== null) {
-                // Now you have the text content as a string
-                console.log('Text Content:', textContent);
-            } else {
-                console.log('Text Content not found');
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-} catch (error) {
-    console.error(error);
+if (textContent !== null) {
+    console.log('Text Content:', textContent);
+} else {
+    console.log('Text Content not found');
 }
