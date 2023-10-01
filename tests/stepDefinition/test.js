@@ -1,42 +1,29 @@
 import * as fs from 'fs';
 import * as fastXmlParser from 'fast-xml-parser';
+import * as xml2js from 'xml2js';
 
-// Define a synchronous function to read and parse XML data
-function readAndParseXmlFileSync(xmlFilePath: string): any {
-    try {
-        // Read the XML data from the file
-        const xmlData = fs.readFileSync(xmlFilePath, 'utf-8');
-
-        // Parse the XML data using fast-xml-parser
-        const options = {
-            attributeNamePrefix: '@',
-            ignoreAttributes: false,
-            parseAttributeValue: true,
-        };
-        const parsedData = fastXmlParser.parse(xmlData, options);
-
-        return parsedData;
-    } catch (error) {
-        throw new Error(`Error parsing XML: ${error}`);
-    }
+// Define a function to read XML data from a file
+function readXmlFile(filePath: string): string {
+    return fs.readFileSync(filePath, 'utf-8');
 }
 
-// Define a function to extract text content based on the specified XML path
-function extractTextContentFromXml(xmlData: any, xmlPath: string): string {
+// Define a function to extract text content using a relative XPath expression
+async function extractTextContent(xmlData: string, relativeXPath: string): Promise<string> {
     try {
-        const pathElements = xmlPath.split('/');
-        let value = xmlData;
+        // Parse the XML data using fast-xml-parser
+        const parsedXml = fastXmlParser.parse(xmlData);
 
-        for (const element of pathElements) {
-            if (element && value && value[element]) {
-                value = value[element];
-            } else {
-                return 'Not found';
-            }
-        }
+        // Convert the parsed XML to a string
+        const xmlString = new xml2js.Builder().buildObject(parsedXml);
 
-        if (typeof value === 'string') {
-            return value;
+        // Parse the XML string using xml2js
+        const parsedData = await xml2js.parseStringPromise(xmlString);
+
+        // Use the relative XPath expression to navigate and extract the text content
+        const result = getObjectByXPath(parsedData, relativeXPath);
+
+        if (result) {
+            return result;
         } else {
             return 'Not found';
         }
@@ -45,19 +32,38 @@ function extractTextContentFromXml(xmlData: any, xmlPath: string): string {
     }
 }
 
+// Helper function to navigate the XML structure using XPath-like syntax
+function getObjectByXPath(obj: any, xpath: string): any {
+    const parts = xpath.split('/');
+    let current = obj;
+
+    for (const part of parts) {
+        if (!current || !current.hasOwnProperty(part)) {
+            return null;
+        }
+        current = current[part];
+    }
+
+    return current;
+}
+
 // Usage example:
 const xmlFilePath = 'path/to/xml/file.xml';
-const xmlPath = 'test/test1/name/id'; // Replace with your desired XML path
+const relativeXPath = 'test/test1/name/id'; // Replace with your desired relative XPath
 
 try {
-    // Read and parse the XML file
-    const xmlResult = readAndParseXmlFileSync(xmlFilePath);
+    // Read XML data from the file
+    const xmlData = readXmlFile(xmlFilePath);
 
-    // Extract text content based on the specified XML path
-    const textContent = extractTextContentFromXml(xmlResult, xmlPath);
-
-    // Now you have the text content as a string
-    console.log('Text Content:', textContent);
+    // Extract text content using the relative XPath
+    extractTextContent(xmlData, relativeXPath)
+        .then((textContent) => {
+            // Now you have the text content as a string
+            console.log('Text Content:', textContent);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 } catch (error) {
     console.error(error);
 }
