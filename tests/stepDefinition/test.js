@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as fastXmlParser from 'fast-xml-parser';
 import * as xml2js from 'xml2js';
 
 // Define a function to read XML data from a file
@@ -7,19 +6,13 @@ function readXmlFile(filePath: string): string {
     return fs.readFileSync(filePath, 'utf-8');
 }
 
-// Define a function to extract text content using a relative XPath expression
+// Define a function to extract text content using an XPath-like expression
 async function extractTextContent(xmlData: string, relativeXPath: string): Promise<string> {
     try {
-        // Parse the XML data using fast-xml-parser
-        const parsedXml = fastXmlParser.parse(xmlData);
+        // Parse the XML data using xml2js
+        const parsedData = await xml2js.parseStringPromise(xmlData);
 
-        // Convert the parsed XML to a string
-        const xmlString = new xml2js.Builder().buildObject(parsedXml);
-
-        // Parse the XML string using xml2js
-        const parsedData = await xml2js.parseStringPromise(xmlString);
-
-        // Use the relative XPath expression to navigate and extract the text content
+        // Use the relativeXPath to navigate and extract the text content
         const result = getObjectByXPath(parsedData, relativeXPath);
 
         if (result) {
@@ -52,18 +45,4 @@ const xmlFilePath = 'path/to/xml/file.xml';
 const relativeXPath = 'test/test1/name/id'; // Replace with your desired relative XPath
 
 try {
-    // Read XML data from the file
-    const xmlData = readXmlFile(xmlFilePath);
-
-    // Extract text content using the relative XPath
-    extractTextContent(xmlData, relativeXPath)
-        .then((textContent) => {
-            // Now you have the text content as a string
-            console.log('Text Content:', textContent);
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-} catch (error) {
-    console.error(error);
-}
+    // Read XML data from the
