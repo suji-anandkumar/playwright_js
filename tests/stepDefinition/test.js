@@ -45,4 +45,14 @@ const xmlFilePath = 'path/to/xml/file.xml';
 const relativeXPath = 'test/test1/name/id'; // Replace with your desired relative XPath
 
 try {
-    // Read XML data from the
+    // Read XML data from the file
+    const xmlData = readXmlFile(xmlFilePath);
+
+    // Extract text content using the relativeXPath
+    const textContent = await extractTextContent(xmlData, relativeXPath);
+
+    // Now you have the text content as a string
+    console.log('Text Content:', textContent);
+} catch (error) {
+    console.error(error);
+}
