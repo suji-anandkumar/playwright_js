@@ -1,58 +1,22 @@
-import * as xml2js from 'xml2js';
+import xml.etree.ElementTree as ET
 
-// Define a function to extract text content using a relative XPath expression
-function extractTextFromXmlWithDoubleSlash(xmlData: string, relativeXPath: string): string | null {
-    try {
-        // Parse the XML data using xml2js
-        const parsedData = xml2js.xml2js(xmlData, { compact: false });
+# Path to the XML file
+xml_file_path = "path/to/your/xmlfile.xml"  # Replace with the actual file path
 
-        // Remove any leading slash from the relativeXPath
-        const cleanedRelativeXPath = relativeXPath.startsWith('//') ? relativeXPath.substring(2) : relativeXPath;
+# Parse the XML file
+tree = ET.parse(xml_file_path)
+root = tree.getroot()
 
-        // Split the cleaned relativeXPath into parts
-        const parts = cleanedRelativeXPath.split('/');
+# Specify the relative path to the 'partydetails' element
+relative_path = "your/relative/path/partydetails"
 
-        // Function to recursively traverse the parsed XML object
-        const traverseXml = (current: any, index: number): string | null => {
-            if (!current || !current.elements) {
-                return null;
-            }
+# Find the element with the href attribute at the relative path
+party_details = root.find(relative_path)
 
-            const part = parts[index];
-            const element = current.elements.find((el: any) => el.name === part);
+# Get the value of the href attribute
+href_value = party_details.get("href")
 
-            if (!element) {
-                return null;
-            }
+# Extract the numeric part
+numeric_part = href_value.lstrip('p')
 
-            if (index === parts.length - 1) {
-                return element.elements[0]?.text || null;
-            }
-
-            return traverseXml(element, index + 1);
-        };
-
-        // Start traversal from the root element
-        const textContent = traverseXml(parsedData, 0);
-
-        if (textContent !== null) {
-            return textContent;
-        } else {
-            return 'Not found';
-        }
-    } catch (error) {
-        throw new Error(`Error extracting text content: ${error}`);
-    }
-}
-
-// Usage example:
-const xmlData = '<notification><date><newDate><tradeDate>2023-09-30</tradeDate></newDate></date></notification>';
-const relativeXPath = '//tradeDate'; // Use your desired relative XPath
-
-const textContent = extractTextFromXmlWithDoubleSlash(xmlData, relativeXPath);
-
-if (textContent !== null) {
-    console.log('Text Content:', textContent);
-} else {
-    console.log('Text Content not found');
-}
+print(numeric_part)
